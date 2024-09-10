@@ -20,6 +20,7 @@ import sqlite3
 import requests
 
 from web3 import Web3
+import web3
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -68,7 +69,7 @@ class DepositTracker:
         """
         con.close()
 
-    def get_last_processed_block(self):
+    def get_last_processed_block(self) -> int:
         """
         Get the last processed block number from the database.
         If no block number is found, it returns a block number 1000 blocks ago.
@@ -92,7 +93,7 @@ class DepositTracker:
                 logger.error(f"Error in tracking deposits: {str(e)}")
                 time.sleep(10)  # Wait for a minute before retrying
 
-    def process_new_blocks(self, start_block, end_block):
+    def process_new_blocks(self, start_block: int, end_block: int):
         """
         Process new blocks to check for deposits
         :param start_block: The block number to start processing
@@ -104,7 +105,7 @@ class DepositTracker:
                 if tx['to'] and tx['to'].lower() == DEPOSIT_CONTRACT_ADDRESS.lower():
                     self.process_deposit(tx, block)
 
-    def process_deposit(self, tx, block):
+    def process_deposit(self, tx: web3.datastructures.AttributeDict, block: web3.datastructures.AttributeDict):
         """
         Process a new deposit transaction
         :param tx: The transaction object
@@ -121,7 +122,7 @@ class DepositTracker:
         self.save_deposit(deposit)
         self.send_alert(deposit)
 
-    def save_deposit(self, deposit):
+    def save_deposit(self, deposit: dict):
         """
         Save the deposit details to a database and log the details
         :param deposit: The deposit details
@@ -143,7 +144,7 @@ class DepositTracker:
 
         con.commit()
 
-    def send_alert(self, deposit):
+    def send_alert(self, deposit: dict):
         """
         Send an alert for the new deposit
         :param deposit: The deposit details
@@ -152,7 +153,7 @@ class DepositTracker:
         self.send_telegram_notification(deposit)
         # self.update_grafana_dashboard(deposit)
 
-    def send_telegram_notification(self, deposit):
+    def send_telegram_notification(self, deposit: dict):
         """
         Send a Telegram notification for the new deposit
         :param deposit: The deposit details
